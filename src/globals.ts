@@ -4,7 +4,7 @@ interface GlobalOptions {
 
 // default value
 const globalState: GlobalOptions = {
-  nullableMode: 'nullish',
+  nullableMode: 'optional',
 }
 
 export function setGlobalOptions(options: Partial<GlobalOptions>) {

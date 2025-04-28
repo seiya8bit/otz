@@ -50,7 +50,7 @@ const main = defineCommand({
       alias: ['n'],
       description: '',
       required: false,
-      default: 'nullish',
+      default: 'optional',
     },
   },
   run: async ({ args }) => {
