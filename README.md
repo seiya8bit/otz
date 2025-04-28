@@ -43,8 +43,8 @@ For OpenAPI definitions split across multiple files, specify the root file in th
 
 ## Examples
 
-- [Petstore(basic)](https://github.com/seiya8bit/typespec-to-zod/tree/main/examples/petstore)
-- [with Hono(advanced)](https://github.com/seiya8bit/typespec-to-zod/tree/main/examples/with-hono)
+- [Petstore(basic)](https://github.com/seiya8bit/otz/tree/main/examples/petstore)
+- [with Hono(advanced)](https://github.com/seiya8bit/otz/tree/main/examples/with-hono)
 
 ## Contributing
 
