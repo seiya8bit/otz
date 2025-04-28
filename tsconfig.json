@@ -1,0 +1,9 @@
+{
+  "extends": "@tsconfig/node22/tsconfig.json", // Extend base Node.js v22 TypeScript configuration
+  "compilerOptions": {
+    "resolveJsonModule": true // Enable importing JSON files as modules
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
+}

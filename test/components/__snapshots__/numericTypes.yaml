@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: (title)
+  version: 0.0.0
+tags: []
+paths: {}
+components:
+  schemas:
+    NumericTypes:
+      type: object
+      required:
+        - numericProperty
+        - integerProperty
+        - floatProperty
+        - int64Property
+        - int32Property
+        - int16Property
+        - int8Property
+        - safeintProperty
+        - uint64Property
+        - uint32Property
+        - uint16Property
+        - uint8Property
+        - float32Property
+        - float64Property
+        - decimalProperty
+        - decimal128Property
+      properties:
+        numericProperty:
+          type: number
+          default: 0
+        integerProperty:
+          type: integer
+          default: 0
+        floatProperty:
+          type: number
+          default: 0
+        int64Property:
+          type: integer
+          format: int64
+          default: 0
+        int32Property:
+          type: integer
+          format: int32
+          default: 0
+        int16Property:
+          type: integer
+          format: int16
+          default: 0
+        int8Property:
+          type: integer
+          format: int8
+          default: 0
+        safeintProperty:
+          type: integer
+          format: int64
+          default: 0
+        uint64Property:
+          type: integer
+          format: uint64
+          default: 0
+        uint32Property:
+          type: integer
+          format: uint32
+          default: 0
+        uint16Property:
+          type: integer
+          format: uint16
+          default: 0
+        uint8Property:
+          type: integer
+          format: uint8
+          default: 0
+        float32Property:
+          type: number
+          format: float
+          default: 0
+        float64Property:
+          type: number
+          format: double
+          default: 0
+        decimalProperty:
+          type: number
+          format: decimal
+          default: 0
+        decimal128Property:
+          type: number
+          format: decimal128
+          default: 0

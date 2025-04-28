@@ -1,0 +1,198 @@
+openapi: 3.0.0
+info:
+  title: Pet Store
+  version: 0.0.0
+tags: []
+paths:
+  /pets:
+    get:
+      operationId: Pets_list
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+    post:
+      operationId: Pets_create
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        '202':
+          description: The request has been accepted for processing, but processing has not yet completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+  /pets/{petId}:
+    get:
+      operationId: Pets_get
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+    put:
+      operationId: Pets_update
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+    delete:
+      operationId: Pets_delete
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+components:
+  schemas:
+    InternalServerError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - INTERNAL_SERVER_ERROR
+        message:
+          type: string
+    NotFoundError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - NOT_FOUND
+        message:
+          type: string
+    Pet:
+      type: object
+      required:
+        - id
+        - name
+        - age
+        - kind
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+          minLength: 1
+        age:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 100
+        kind:
+          $ref: '#/components/schemas/petType'
+    ValidationError:
+      type: object
+      required:
+        - code
+        - message
+        - details
+      properties:
+        code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+    petType:
+      type: string
+      enum:
+        - dog
+        - cat
+        - fish
+        - bird
+        - reptile
+servers:
+  - url: https://example.com
+    description: Single server endpoint
+    variables: {}

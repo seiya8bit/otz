@@ -1,0 +1,37 @@
+openapi: 3.0.0
+info:
+  title: (title)
+  version: 0.0.0
+tags: []
+paths: {}
+components:
+  schemas:
+    DateAndTimeTypes:
+      type: object
+      required:
+        - plainDateProperty
+        - plainTimeProperty
+        - utcDateTimeProperty
+        - offsetDateTimeProperty
+        - durationProperty
+      properties:
+        plainDateProperty:
+          type: string
+          format: date
+          default: 1970-01-01T00:00:00Z
+        plainTimeProperty:
+          type: string
+          format: time
+          default: 1970-01-01T00:00:00Z
+        utcDateTimeProperty:
+          type: string
+          format: date-time
+          default: 1970-01-01T00:00:00Z
+        offsetDateTimeProperty:
+          type: string
+          format: date-time
+          default: 1970-01-01T00:00:00Z
+        durationProperty:
+          type: string
+          format: duration
+          default: P3Y6M4DT12H30M5S

@@ -1,0 +1,10 @@
+node_modules
+__debug__
+*.log
+.DS_Store
+coverage
+dist
+types
+.gen
+.nyc_output
+.idea/

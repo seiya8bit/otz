@@ -1,0 +1,21 @@
+openapi: 3.0.0
+info:
+  title: (title)
+  version: 0.0.0
+tags: []
+paths: {}
+components:
+  schemas:
+    StringTypes:
+      type: object
+      required:
+        - standardProperty
+        - urlProperty
+      properties:
+        standardProperty:
+          type: string
+          default: default value
+        urlProperty:
+          type: string
+          format: uri
+          default: https://example.com

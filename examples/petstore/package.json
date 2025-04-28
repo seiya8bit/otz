@@ -1,0 +1,22 @@
+{
+  "name": "petstore",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "gen": "otz -i ./output/openapi.yaml -o ./gen/openapi.ts -c -p -q -n optional"
+  },
+  "peerDependencies": {
+    "@typespec/compiler": "latest",
+    "@typespec/http": "latest",
+    "@typespec/openapi3": "latest",
+    "@typespec/rest": "latest"
+  },
+  "devDependencies": {
+    "@seiya8bit/otz": "^0.8.0",
+    "@typespec/compiler": "latest",
+    "@typespec/http": "latest",
+    "@typespec/openapi3": "latest",
+    "@typespec/rest": "latest"
+  }
+}
