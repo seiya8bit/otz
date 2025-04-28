@@ -95,29 +95,132 @@ function createZodImportAst() {
   )
 }
 
+const _zodBaseTypes = [
+  'string',
+  'number',
+  'bigint',
+  'boolean',
+  'date',
+  'symbol',
+  'undefined',
+  'null',
+  'void',
+  'any',
+  'unknown',
+  'never',
+  'array',
+  'enum',
+  'object',
+  'union',
+  'record',
+] as const
+
+/**
+ * Defines all the supported number validation types in Zod v4.
+ *
+ * This constant contains specialized number validation types that can enforce
+ * integer constraints, specific bit-widths, and unsigned integer validation.
+ * These types provide more precise number validation than the base number type,
+ * allowing for validation of integers, 32-bit integers, 64-bit integers,
+ * floating point numbers, and unsigned integers.
+ *
+ * @see https://v4.zod.dev/api#numbers
+ */
+const _zodNumberTypes = [
+  'int',
+  'int32',
+  'int64',
+  'float32',
+  'float64',
+  'uint32',
+  'uint64',
+] as const
+
+/**
+ * Defines all the supported string format types in Zod v4.
+ *
+ * This constant contains all the string validation formats that can be used
+ * with Zod's string validation methods. These formats provide specific
+ * validation rules for common string patterns like email addresses, UUIDs,
+ * IP addresses, and various ISO format strings.
+ *
+ * @see https://v4.zod.dev/api#string-formats
+ */
+const _zodStringTypes = [
+  'email',
+  'uuid',
+  'uuidv4',
+  'uuidv6',
+  'uuidv7',
+  'uri',
+  'url',
+  'emoji', // validates a single emoji character
+  'base64',
+  'base64url',
+  'nanoid',
+  'cuid',
+  'cuid2',
+  'ulid',
+  'guid',
+  'ipv4',
+  'ipv6',
+  'cidrv4', // ipv4 CIDR block
+  'cidrv6', // ipv6 CIDR block
+  'iso.date',
+  'iso.time',
+  'iso.datetime',
+  'iso.duration',
+] as const
+
 /**
  * Represents the supported Zod types, including primitive types and other supported types.
  *
  * @see https://zod.dev/?id=primitives
  */
 type ZodType =
-  | 'string'
-  | 'number'
-  | 'bigint'
-  | 'boolean'
-  | 'date'
-  | 'symbol'
-  | 'undefined'
-  | 'null'
-  | 'void'
-  | 'any'
-  | 'unknown'
-  | 'never'
-  | 'array'
-  | 'enum'
-  | 'object'
-  | 'union'
-  | 'record'
+  | typeof _zodBaseTypes[number]
+  | typeof _zodNumberTypes[number]
+  | typeof _zodStringTypes[number]
+
+const numberFormatMap: { [key: string]: typeof _zodNumberTypes[number] } = {
+  int: 'int',
+  integer: 'int',
+  int32: 'int32',
+  float: 'float32',
+  float32: 'float32',
+  double: 'float64',
+  float64: 'float64',
+  uint8: 'int',
+  uint16: 'int',
+  uint32: 'uint32',
+  uint64: 'uint64',
+}
+
+const stringFormatMap: { [key: string]: typeof _zodStringTypes[number] } = {
+  'email': 'email',
+  'uuid': 'uuid',
+  'uuidv4': 'uuidv4',
+  'uuidv6': 'uuidv6',
+  'uuidv7': 'uuidv7',
+  'uri': 'url',
+  'url': 'url',
+  'emoji': 'emoji',
+  'base64': 'base64',
+  'base64url': 'base64url',
+  'nanoid': 'nanoid',
+  'cuid': 'cuid',
+  'cuid2': 'cuid2',
+  'ulid': 'ulid',
+  'guid': 'guid',
+  'ipv4': 'ipv4',
+  'ipv6': 'ipv6',
+  'cidrv4': 'cidrv4',
+  'cidrv6': 'cidrv6',
+  'date': 'iso.date',
+  'time': 'iso.time',
+  'date-time': 'iso.datetime',
+  'duration': 'iso.duration',
+}
 
 /**
  * Creates a TypeScript property access expression for a specified zod type.
@@ -212,6 +315,7 @@ function createZodSchemaAst(
         [ts.factory.createArrayLiteralExpression(unionTypes, false)],
       )
     }
+
     // Extended notation for description
     if (isDocExtendedNotation(object.description)) {
       const schemaExpression = extractZodSchemaFromDescription(object.description)
@@ -242,19 +346,34 @@ function createZodSchemaAst(
       }
       case 'integer':
       case 'number':
+      {
+        const format = object.format ?? ''
+        const type = numberFormatMap[format] || 'number'
+
         return ts.factory.createCallExpression(
-          createZodPropertyAccessAst('number'),
+          createZodPropertyAccessAst(type),
           undefined,
           [],
         )
+      }
       case 'boolean':
       case 'null':
-      case 'string':
         return ts.factory.createCallExpression(
           createZodPropertyAccessAst(object.type),
           undefined,
           [],
         )
+      case 'string':
+      {
+        const format = object.format ?? ''
+        const type = stringFormatMap[format] || 'string'
+
+        return ts.factory.createCallExpression(
+          createZodPropertyAccessAst(type),
+          undefined,
+          [],
+        )
+      }
       default:
         return ts.factory.createCallExpression(
           createZodPropertyAccessAst('unknown'),
@@ -267,7 +386,6 @@ function createZodSchemaAst(
   let expression = createBaseExpression()
   if (ts.isCallExpression(expression)) {
     expression = applyMergeToZodExpression(object, expression)
-    expression = applyFormatToZodExpression(object, expression)
     expression = applyConstraintsToZodExpression(object, expression)
     expression = applyNullableToZodExpression(required, expression)
     expression = applyDefaultToZodExpression(object, expression)
@@ -342,58 +460,6 @@ function createZodVariableStatement(variableName: string, object: SchemaObject |
   const description = removeZodSchemaFromDescription(object.description)
 
   return applyComment(description, 'single', statement)
-}
-
-/**
- * Adds a format specification to a zod call expression.
- *
- * @param object - The schema object or reference object.
- * @param callExpression - The existing call expression.
- * @returns A new CallExpression with the format applied.
- */
-function applyFormatToZodExpression(object: SchemaObject, callExpression: CallExpression) {
-  const format = object.format
-  if (!format) {
-    return callExpression
-  }
-
-  const formatMap: { [key: string]: string } = {
-    'integer': 'int',
-    'int64': 'int',
-    'int32': 'int',
-    'int16': 'int',
-    'int8': 'int',
-    'safeint': 'int',
-    'uint64': 'int',
-    'uint32': 'int',
-    'uint16': 'int',
-    'uint8': 'int',
-    'date-time': 'datetime',
-    'date': 'date',
-    'time': 'time',
-    'duration': 'duration',
-    'ip': 'ip',
-    'email': 'email',
-    'uuid': 'uuid',
-    'cuid': 'cuid',
-    'cuid2': 'cuid2',
-    'url': 'url',
-    'uri': 'url',
-  }
-
-  const formatIdentifier = formatMap[format]
-  if (!formatIdentifier) {
-    return callExpression
-  }
-
-  return ts.factory.createCallExpression(
-    ts.factory.createPropertyAccessExpression(
-      callExpression,
-      ts.factory.createIdentifier(formatIdentifier),
-    ),
-    undefined,
-    [],
-  )
 }
 
 /**
@@ -761,7 +827,6 @@ export default {
   createZodSchemaAst,
   createZodPropertyAssignmentAst,
   createZodVariableStatement,
-  applyFormatToZodExpression,
   applyDefaultToZodExpression,
   applyNullableToZodExpression,
   applyConstraintsToZodExpression,
