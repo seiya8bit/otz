@@ -1,38 +1,38 @@
 import "@typespec/http";
-import "@typespec/rest";
+import "@typespec/versioning";
 
-import "../models";
-import "../common";
+import "../util.tsp";
+
+import "../models/user.tsp";
 
 using TypeSpec.Http;
-using TypeSpec.Rest;
-namespace Root;
 
-@tag("User")
-namespace UserNamespace {
-  @route("/users")
-  interface Users {
-    @get
-    @summary("List users")
-    list(
-      @query limit?: string = "20",
-      @query offset?: string = "0",
-    ): Pagination<User> | BadRequestResponse;
+using WithHonoService.Utils;
 
-    @get
-    @summary("get user")
-    get(@path id: cuid2): User | NotFoundResponse;
+namespace WithHonoService.Models;
 
-    @post
-    @summary("Create user")
-    create(@body user: User): User | BadRequestResponse;
+@route("/users")
+interface Users {
+  @get
+  @summary("List users")
+  list(
+    @query limit?: string = "20",
+    @query offset?: string = "0",
+  ): Pagination<User> | BadRequestResponse;
 
-    @patch
-    @summary("Edit user")
-    update(@path id: cuid2, @body user: User): User | BadRequestResponse;
+  @get
+  @summary("get user")
+  get(@path id: cuid2): User | NotFoundResponse;
 
-    @delete
-    @summary("Delete user")
-    delete(@path id: cuid2): NoContentResponse | BadRequestResponse;
-  }
+  @post
+  @summary("Create user")
+  create(@body user: User): User | BadRequestResponse;
+
+  @patch
+  @summary("Edit user")
+  update(@path id: cuid2, @body user: User): User | BadRequestResponse;
+
+  @delete
+  @summary("Delete user")
+  delete(@path id: cuid2): NoContentResponse | BadRequestResponse;
 }

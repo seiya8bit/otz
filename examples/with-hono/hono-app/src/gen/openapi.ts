@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-// Category model
-export const schemaCategory = z.object({
+export const schemaModelsCategory = z.object({
     id: z.string().cuid2(),
     // category name
     name: z.string().min(2).max(32),
@@ -9,27 +8,23 @@ export const schemaCategory = z.object({
     updatedAt: z.string().datetime()
 });
 
-// Category model
-export const schemaCategoryCreate = z.object({
+export const schemaModelsCategoryCreate = z.object({
     // category name
     name: z.string().min(2).max(32)
 });
 
-// Category model
-export const schemaCategoryCreateItem = z.object({
+export const schemaModelsCategoryCreateItem = z.object({
     // category name
     name: z.string().min(2).max(32)
 });
 
-// Category model
-export const schemaCategoryUpdate = z.object({
+export const schemaModelsCategoryUpdate = z.object({
     id: z.string().cuid2().optional(),
     // category name
     name: z.string().min(2).max(32).optional()
 });
 
-// Post model
-export const schemaPost = z.object({
+export const schemaModelsPost = z.object({
     id: z.string().cuid2(),
     title: z.string().min(1),
     // Markdown formatted string
@@ -45,8 +40,7 @@ export const schemaPost = z.object({
     updatedAt: z.string().datetime()
 });
 
-// Post model
-export const schemaPostCreate = z.object({
+export const schemaModelsPostCreate = z.object({
     title: z.string().min(1),
     // Markdown formatted string
     body: z.string().min(1),
@@ -56,8 +50,7 @@ export const schemaPostCreate = z.object({
     }))
 });
 
-// Post model
-export const schemaPostCreateItem = z.object({
+export const schemaModelsPostCreateItem = z.object({
     title: z.string().min(1),
     // Markdown formatted string
     body: z.string().min(1),
@@ -67,8 +60,7 @@ export const schemaPostCreateItem = z.object({
     }))
 });
 
-// Post model
-export const schemaPostUpdate = z.object({
+export const schemaModelsPostUpdate = z.object({
     id: z.string().cuid2().optional(),
     title: z.string().min(1).optional(),
     // Markdown formatted string
@@ -82,8 +74,7 @@ export const schemaPostUpdate = z.object({
     })).optional()
 });
 
-// User model
-export const schemaUser = z.object({
+export const schemaModelsUser = z.object({
     id: z.string().cuid2(),
     // username
     name: z.string().min(2).max(32),
@@ -108,8 +99,7 @@ export const schemaUser = z.object({
     updatedAt: z.string().datetime()
 });
 
-// User model
-export const schemaUserCreate = z.object({
+export const schemaModelsUserCreate = z.object({
     // username
     name: z.string().min(2).max(32),
     email: z.string().email(),
@@ -125,8 +115,7 @@ export const schemaUserCreate = z.object({
     }))
 });
 
-// User model
-export const schemaUserUpdate = z.object({
+export const schemaModelsUserUpdate = z.object({
     id: z.string().cuid2().optional(),
     // username
     name: z.string().min(2).max(32).optional(),
@@ -149,7 +138,9 @@ export const schemaUserUpdate = z.object({
     })).optional()
 });
 
-export const schemaCuid2 = z.string().cuid2();
+export const schemaUtilsCuid2 = z.string().cuid2();
+
+export const schemaVersions = z.enum(["v1"]);
 
 export const pathCategoriesGet = z.object({
     id: z.string().cuid2()

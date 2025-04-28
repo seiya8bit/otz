@@ -1,9 +1,16 @@
-import "../common";
+import "@typespec/versioning";
 
-@doc("Category model")
+import "../util.tsp";
+
+using Versioning;
+
+using WithHonoService.Utils;
+
+namespace WithHonoService.Models;
+
 model Category {
   @key
-  @visibility("read", "update")
+  @visibility(Lifecycle.Read, Lifecycle.Update)
   id: cuid2;
 
   @minLength(2)
@@ -11,5 +18,9 @@ model Category {
   @doc("category name")
   name: string;
 
-  ...Timestamps;
+  @visibility(Lifecycle.Read)
+  createdAt: utcDateTime;
+
+  @visibility(Lifecycle.Read)
+  updatedAt: utcDateTime;
 }

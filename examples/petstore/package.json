@@ -13,7 +13,7 @@
     "@typespec/rest": "latest"
   },
   "devDependencies": {
-    "@seiya8bit/otz": "^1.0.0",
+    "@seiya8bit/otz": "latest",
     "@typespec/compiler": "latest",
     "@typespec/http": "latest",
     "@typespec/openapi3": "latest",

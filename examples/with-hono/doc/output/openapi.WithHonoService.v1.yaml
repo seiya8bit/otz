@@ -1,11 +1,8 @@
 openapi: 3.0.0
 info:
   title: With-Hono API Example
-  version: 0.0.0
-tags:
-  - name: Category
-  - name: Post
-  - name: User
+  version: v1
+tags: []
 paths:
   /categories:
     get:
@@ -51,11 +48,9 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Category'
+                      $ref: '#/components/schemas/Models.Category'
         '400':
           description: The server could not understand the request due to invalid syntax.
-      tags:
-        - Category
     post:
       operationId: Categories_create
       summary: Create category
@@ -66,17 +61,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
+                $ref: '#/components/schemas/Models.Category'
         '400':
           description: The server could not understand the request due to invalid syntax.
-      tags:
-        - Category
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CategoryCreate'
+              $ref: '#/components/schemas/Models.CategoryCreate'
   /categories/{id}:
     get:
       operationId: Categories_get
@@ -86,18 +79,16 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/cuid2'
+            $ref: '#/components/schemas/Utils.cuid2'
       responses:
         '200':
           description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
+                $ref: '#/components/schemas/Models.Category'
         '404':
           description: The server cannot find the requested resource.
-      tags:
-        - Category
     patch:
       operationId: Categories_update
       summary: Edit category
@@ -106,24 +97,22 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/cuid2'
+            $ref: '#/components/schemas/Utils.cuid2'
       responses:
         '200':
           description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
+                $ref: '#/components/schemas/Models.Category'
         '400':
           description: The server could not understand the request due to invalid syntax.
-      tags:
-        - Category
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CategoryUpdate'
+              $ref: '#/components/schemas/Models.CategoryUpdate'
     delete:
       operationId: Categories_delete
       summary: Delete category
@@ -132,14 +121,12 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/cuid2'
+            $ref: '#/components/schemas/Utils.cuid2'
       responses:
         '204':
           description: There is no content to send for this request, but the headers may be useful.
         '400':
           description: The server could not understand the request due to invalid syntax.
-      tags:
-        - Category
   /posts:
     get:
       operationId: Posts_list
@@ -184,11 +171,9 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Post'
+                      $ref: '#/components/schemas/Models.Post'
         '400':
           description: The server could not understand the request due to invalid syntax.
-      tags:
-        - Post
     post:
       operationId: Posts_create
       summary: Create post
@@ -199,17 +184,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/Models.Post'
         '400':
           description: The server could not understand the request due to invalid syntax.
-      tags:
-        - Post
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostCreate'
+              $ref: '#/components/schemas/Models.PostCreate'
   /posts/{id}:
     get:
       operationId: Posts_get
@@ -219,18 +202,16 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/cuid2'
+            $ref: '#/components/schemas/Utils.cuid2'
       responses:
         '200':
           description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/Models.Post'
         '404':
           description: The server cannot find the requested resource.
-      tags:
-        - Post
     patch:
       operationId: Posts_update
       summary: Edit post
@@ -239,24 +220,22 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/cuid2'
+            $ref: '#/components/schemas/Utils.cuid2'
       responses:
         '200':
           description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/Models.Post'
         '400':
           description: The server could not understand the request due to invalid syntax.
-      tags:
-        - Post
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostUpdate'
+              $ref: '#/components/schemas/Models.PostUpdate'
     delete:
       operationId: Posts_delete
       summary: Delete post
@@ -265,14 +244,12 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/cuid2'
+            $ref: '#/components/schemas/Utils.cuid2'
       responses:
         '204':
           description: There is no content to send for this request, but the headers may be useful.
         '400':
           description: The server could not understand the request due to invalid syntax.
-      tags:
-        - Post
   /users:
     get:
       operationId: Users_list
@@ -317,11 +294,9 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/User'
+                      $ref: '#/components/schemas/Models.User'
         '400':
           description: The server could not understand the request due to invalid syntax.
-      tags:
-        - User
     post:
       operationId: Users_create
       summary: Create user
@@ -332,17 +307,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Models.User'
         '400':
           description: The server could not understand the request due to invalid syntax.
-      tags:
-        - User
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserCreate'
+              $ref: '#/components/schemas/Models.UserCreate'
   /users/{id}:
     get:
       operationId: Users_get
@@ -352,18 +325,16 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/cuid2'
+            $ref: '#/components/schemas/Utils.cuid2'
       responses:
         '200':
           description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Models.User'
         '404':
           description: The server cannot find the requested resource.
-      tags:
-        - User
     patch:
       operationId: Users_update
       summary: Edit user
@@ -372,24 +343,22 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/cuid2'
+            $ref: '#/components/schemas/Utils.cuid2'
       responses:
         '200':
           description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Models.User'
         '400':
           description: The server could not understand the request due to invalid syntax.
-      tags:
-        - User
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserUpdate'
+              $ref: '#/components/schemas/Models.UserUpdate'
     delete:
       operationId: Users_delete
       summary: Delete user
@@ -398,17 +367,15 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/cuid2'
+            $ref: '#/components/schemas/Utils.cuid2'
       responses:
         '204':
           description: There is no content to send for this request, but the headers may be useful.
         '400':
           description: The server could not understand the request due to invalid syntax.
-      tags:
-        - User
 components:
   schemas:
-    Category:
+    Models.Category:
       type: object
       required:
         - id
@@ -417,7 +384,7 @@ components:
         - updatedAt
       properties:
         id:
-          $ref: '#/components/schemas/cuid2'
+          $ref: '#/components/schemas/Utils.cuid2'
         name:
           type: string
           minLength: 2
@@ -431,8 +398,7 @@ components:
           type: string
           format: date-time
           readOnly: true
-      description: Category model
-    CategoryCreate:
+    Models.CategoryCreate:
       type: object
       required:
         - name
@@ -442,8 +408,7 @@ components:
           minLength: 2
           maxLength: 32
           description: category name
-      description: Category model
-    CategoryCreateItem:
+    Models.CategoryCreateItem:
       type: object
       required:
         - name
@@ -453,19 +418,17 @@ components:
           minLength: 2
           maxLength: 32
           description: category name
-      description: Category model
-    CategoryUpdate:
+    Models.CategoryUpdate:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/cuid2'
+          $ref: '#/components/schemas/Utils.cuid2'
         name:
           type: string
           minLength: 2
           maxLength: 32
           description: category name
-      description: Category model
-    Post:
+    Models.Post:
       type: object
       required:
         - id
@@ -476,7 +439,7 @@ components:
         - updatedAt
       properties:
         id:
-          $ref: '#/components/schemas/cuid2'
+          $ref: '#/components/schemas/Utils.cuid2'
         title:
           type: string
           minLength: 1
@@ -487,7 +450,7 @@ components:
         categories:
           type: array
           items:
-            $ref: '#/components/schemas/Category'
+            $ref: '#/components/schemas/Models.Category'
         createdAt:
           type: string
           format: date-time
@@ -496,8 +459,7 @@ components:
           type: string
           format: date-time
           readOnly: true
-      description: Post model
-    PostCreate:
+    Models.PostCreate:
       type: object
       required:
         - title
@@ -514,9 +476,8 @@ components:
         categories:
           type: array
           items:
-            $ref: '#/components/schemas/CategoryCreateItem'
-      description: Post model
-    PostCreateItem:
+            $ref: '#/components/schemas/Models.CategoryCreateItem'
+    Models.PostCreateItem:
       type: object
       required:
         - title
@@ -533,13 +494,12 @@ components:
         categories:
           type: array
           items:
-            $ref: '#/components/schemas/CategoryCreateItem'
-      description: Post model
-    PostUpdate:
+            $ref: '#/components/schemas/Models.CategoryCreateItem'
+    Models.PostUpdate:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/cuid2'
+          $ref: '#/components/schemas/Utils.cuid2'
         title:
           type: string
           minLength: 1
@@ -550,9 +510,8 @@ components:
         categories:
           type: array
           items:
-            $ref: '#/components/schemas/Category'
-      description: Post model
-    User:
+            $ref: '#/components/schemas/Models.Category'
+    Models.User:
       type: object
       required:
         - id
@@ -564,7 +523,7 @@ components:
         - updatedAt
       properties:
         id:
-          $ref: '#/components/schemas/cuid2'
+          $ref: '#/components/schemas/Utils.cuid2'
         name:
           type: string
           minLength: 2
@@ -580,7 +539,7 @@ components:
         posts:
           type: array
           items:
-            $ref: '#/components/schemas/Post'
+            $ref: '#/components/schemas/Models.Post'
         createdAt:
           type: string
           format: date-time
@@ -589,8 +548,7 @@ components:
           type: string
           format: date-time
           readOnly: true
-      description: User model
-    UserCreate:
+    Models.UserCreate:
       type: object
       required:
         - name
@@ -613,13 +571,12 @@ components:
         posts:
           type: array
           items:
-            $ref: '#/components/schemas/PostCreateItem'
-      description: User model
-    UserUpdate:
+            $ref: '#/components/schemas/Models.PostCreateItem'
+    Models.UserUpdate:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/cuid2'
+          $ref: '#/components/schemas/Utils.cuid2'
         name:
           type: string
           minLength: 2
@@ -635,11 +592,14 @@ components:
         posts:
           type: array
           items:
-            $ref: '#/components/schemas/Post'
-      description: User model
-    cuid2:
+            $ref: '#/components/schemas/Models.Post'
+    Utils.cuid2:
       type: string
       format: cuid2
+    Versions:
+      type: string
+      enum:
+        - v1
 servers:
   - url: ''
     description: Production

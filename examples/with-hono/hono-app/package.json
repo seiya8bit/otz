@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "gen": "otz -i ../doc/output/openapi.yaml -o src/gen/openapi.ts -c -p -q -n optional"
+    "gen": "otz -i ../doc/output/openapi.WithHonoService.v1.yaml -o src/gen/openapi.ts -c -p -q -n optional"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
@@ -11,7 +11,7 @@
     "hono": "^4.6.10"
   },
   "devDependencies": {
-    "@seiya8bit/otz": "^0.8.0",
+    "@seiya8bit/otz": "latest",
     "@types/node": "^20.11.17",
     "tsx": "^4.7.1"
   }

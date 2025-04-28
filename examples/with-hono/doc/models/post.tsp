@@ -1,10 +1,16 @@
-import ".";
-import "../common";
+import "@typespec/versioning";
 
-@doc("Post model")
+import "../util.tsp";
+
+using Versioning;
+
+using WithHonoService.Utils;
+
+namespace WithHonoService.Models;
+
 model Post {
   @key
-  @visibility("read", "update")
+  @visibility(Lifecycle.Read, Lifecycle.Update)
   id: cuid2;
 
   @minLength(1)
@@ -16,5 +22,9 @@ model Post {
 
   categories: Category[];
 
-  ...Timestamps;
+  @visibility(Lifecycle.Read)
+  createdAt: utcDateTime;
+
+  @visibility(Lifecycle.Read)
+  updatedAt: utcDateTime;
 }

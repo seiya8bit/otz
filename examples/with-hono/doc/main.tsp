@@ -1,18 +1,24 @@
 import "@typespec/http";
-import "@typespec/rest";
-import "@typespec/openapi3";
+import "@typespec/versioning";
 
-import "./common";
-import "./routes";
+import "./util.tsp";
 
-using TypeSpec.Http;
-using TypeSpec.Rest;
+/* Routes */
+import "./routes/category.tsp";
+import "./routes/post.tsp";
+import "./routes/user.tsp";
 
-@service({
+using Http;
+using Versioning;
+
+@service(#{
   title: "With-Hono API Example",
 })
 @server("", "Development")
 @server("", "Production")
-namespace Root {
+@versioned(Versions)
+namespace WithHonoService;
 
+enum Versions {
+  v1,
 }
