@@ -27,7 +27,14 @@ export class CodeGenerator {
     outputNodes.push(ast.createZodImportAst())
 
     if (this.openApiObject.components && this.generateComponents) {
-      const nodes = this.componentParser.toAst(this.openApiObject.components)
+      const sortedSchemas = this.componentParser.sortByDependencies(
+        this.openApiObject.components,
+      )
+
+      const nodes = this.componentParser.toAst(
+        this.openApiObject.components,
+        sortedSchemas,
+      )
       outputNodes.push(...nodes)
     }
     if (this.openApiObject.paths && this.generatePaths) {

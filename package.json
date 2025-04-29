@@ -48,6 +48,7 @@
     "camelcase": "^8.0.0",
     "citty": "^0.1.6",
     "consola": "^3.2.3",
+    "graph-data-structure": "^4.5.0",
     "openapi3-ts": "^4.4.0",
     "yaml": "^2.6.0"
   },
