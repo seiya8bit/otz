@@ -58,7 +58,7 @@ components:
         uint64Property:
           type: integer
           format: uint64
-          default: 0
+          default: 0n
         uint32Property:
           type: integer
           format: uint32

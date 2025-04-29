@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const schemaExample = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
-    age: z.number().int().nullish()
+    age: z.number().nullish()
 });

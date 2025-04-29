@@ -7,6 +7,7 @@ import { isReferenceObject, isSchemaObject } from 'openapi3-ts/oas31'
 import * as ts from 'typescript'
 import c from '../constants.js'
 import { getGlobalOptions } from '../globals.js'
+import helper from './helper.js'
 
 /**
  * Converts a string into a valid TypeScript identifier.
@@ -479,7 +480,13 @@ function applyDefaultToZodExpression(object: SchemaObject, callExpression: CallE
     const type = typeof v
     switch (type) {
       case 'string':
-        return ts.factory.createStringLiteral(v)
+      {
+        const bigintOrUndefined = helper.parseBigInt(v)
+
+        return typeof bigintOrUndefined === 'bigint'
+          ? ts.factory.createBigIntLiteral(v)
+          : ts.factory.createStringLiteral(v)
+      }
       case 'number':
         return ts.factory.createNumericLiteral(v)
       case 'bigint':

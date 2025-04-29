@@ -11,9 +11,9 @@ export const schemaNotFoundError = z.object({
 });
 
 export const schemaPet = z.object({
-    id: z.number().int(),
+    id: z.int32(),
     name: z.string().min(1),
-    age: z.number().int().gte(0).lte(100),
+    age: z.int32().gte(0).lte(100),
     kind: z.enum(["dog", "cat", "fish", "bird", "reptile"])
 });
 
@@ -26,13 +26,13 @@ export const schemaValidationError = z.object({
 export const schemaPetType = z.enum(["dog", "cat", "fish", "bird", "reptile"]);
 
 export const pathPetsGet = z.object({
-    petId: z.number().int()
+    petId: z.int32()
 });
 
 export const pathPetsUpdate = z.object({
-    petId: z.number().int()
+    petId: z.int32()
 });
 
 export const pathPetsDelete = z.object({
-    petId: z.number().int()
+    petId: z.int32()
 });
