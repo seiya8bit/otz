@@ -65,15 +65,39 @@ export class ComponentParser {
     return topologicalSort(this.graph).reverse()
   }
 
-  private getChildrenOfSchemaObject(object: SchemaObject) {
+  private getChildrenOfSchemaObject(object: SchemaObject): (SchemaObject | ReferenceObject)[] {
     const allOf = object.allOf ?? []
     const anyOf = object.anyOf ?? []
     const oneOf = object.oneOf ?? []
     const items = object.items ? [object.items] : []
 
-    const properties = object.properties
-      ? [...Object.values(object.properties)]
-      : []
+    let properties: (SchemaObject | ReferenceObject)[] = []
+    if (object.properties) {
+      properties = [...Object.values(object.properties)]
+
+      for (const prop of Object.values(object.properties)) {
+        if (isSchemaObject(prop)) {
+          if (prop.items) {
+            properties.push(prop.items)
+          }
+          if (prop.properties) {
+            properties.push(...Object.values(prop.properties))
+          }
+          if (prop.allOf) {
+            properties.push(...prop.allOf)
+          }
+          if (prop.anyOf) {
+            properties.push(...prop.anyOf)
+          }
+          if (prop.oneOf) {
+            properties.push(...prop.oneOf)
+          }
+          if (prop.additionalProperties && typeof prop.additionalProperties !== 'boolean') {
+            properties.push(prop.additionalProperties)
+          }
+        }
+      }
+    }
 
     const additionalProperties = object.additionalProperties
       ? typeof object.additionalProperties !== 'boolean'
