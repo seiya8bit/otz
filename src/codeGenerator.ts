@@ -17,7 +17,7 @@ export class CodeGenerator {
   ) {
     this.componentParser = new ComponentParser()
     this.pathParser = new PathParser()
-    this.openApiObject = ast.resolveSchemaReferences(openApiObject)
+    this.openApiObject = openApiObject
   }
 
   public generate() {

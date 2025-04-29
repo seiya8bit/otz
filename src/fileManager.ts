@@ -19,7 +19,7 @@ export class FileManager {
     if (!res.valid) {
       throw res.errors
     }
-    return validator.resolveRefs() as OpenAPIObject
+    return validator.specification as OpenAPIObject
   }
 
   public write(output: string) {

@@ -1,9 +1,9 @@
-import type { ComponentsObject, OpenAPIObject, ParameterObject, ReferenceObject, SchemaObject } from 'openapi3-ts/oas31'
+import type { ParameterObject, ReferenceObject, SchemaObject } from 'openapi3-ts/oas31'
 import type { CallExpression, Identifier, Node, ObjectLiteralElementLike } from 'typescript'
 import { EOL } from 'node:os'
 import camelCase from 'camelcase'
 import consola from 'consola'
-import { isReferenceObject, isSchemaObject } from 'openapi3-ts/oas31'
+import { isReferenceObject } from 'openapi3-ts/oas31'
 import * as ts from 'typescript'
 import c from '../constants.js'
 import { getGlobalOptions } from '../globals.js'
@@ -112,6 +112,7 @@ const _zodBaseTypes = [
   'array',
   'enum',
   'object',
+  'interface',
   'union',
   'record',
 ] as const
@@ -284,27 +285,6 @@ function createZodSchemaAst(
       )
     }
 
-    // TODO: Support record type
-    // // Record type
-    // if (object.additionalProperties !== undefined) {
-    //   const additionalProperties = typeof object.additionalProperties === 'boolean'
-    //     ? createZodPropertyAccessAst('boolean')
-    //     : createZodSchemaAst(object.additionalProperties)
-
-    //   return ts.factory.createCallExpression(
-    //     createZodPropertyAccessAst('record'),
-    //     undefined,
-    //     [
-    //       ts.factory.createCallExpression(
-    //         createZodPropertyAccessAst('string'),
-    //         undefined,
-    //         [],
-    //       ),
-    //       additionalProperties,
-    //     ],
-    //   )
-    // }
-
     // Union type
     if (object.anyOf || object.oneOf) {
       const target = [...object?.anyOf ?? [], ...object?.oneOf ?? []]
@@ -340,7 +320,7 @@ function createZodSchemaAst(
           )
           : []
         return ts.factory.createCallExpression(
-          createZodPropertyAccessAst('object'),
+          createZodPropertyAccessAst('interface'),
           undefined,
           [ts.factory.createObjectLiteralExpression(properties, true)],
         )
@@ -421,13 +401,35 @@ function createZodPropertyAssignmentAst(
     ? ts.factory.createIdentifier(identifier)
     : ts.factory.createStringLiteral(identifier)
 
-  const assignment = ts.factory.createPropertyAssignment(
-    propertyName,
-    createZodSchemaAst(object, required),
-  )
   const description = removeZodSchemaFromDescription(object.description)
 
-  return applyComment(description, 'single', assignment)
+  if (isReferenceObject(object)) {
+    const name = getSchemaNameFromRef(object.$ref)
+    const node = ts.factory.createGetAccessorDeclaration(
+      undefined,
+      propertyName,
+      [],
+      undefined,
+      ts.factory.createBlock(
+        [
+          ts.factory.createReturnStatement(
+            ts.factory.createIdentifier(
+              camelCase(`${c.SCHEMA_PREFIX}_${name}`),
+            ),
+          ),
+        ],
+        true,
+      ),
+    )
+    return applyComment(description, 'single', node)
+  }
+  else {
+    const node = ts.factory.createPropertyAssignment(
+      propertyName,
+      createZodSchemaAst(object, required),
+    )
+    return applyComment(description, 'single', node)
+  }
 }
 
 /**
@@ -668,73 +670,6 @@ function hasReferenceObject(object: SchemaObject) {
 }
 
 /**
- * Converts a schema object or a reference object to a pure schema object,
- * resolving any references recursively.
- *
- * @param componentsObject - The full OpenAPI components object containing all schemas.
- * @param object - The schema or reference object to convert.
- * @returns The resolved schema object.
- * @throws If a schema referenced is not found or is itself a reference.
- */
-function convertReferenceToSchema(
-  componentsObject: ComponentsObject,
-  object: SchemaObject | ReferenceObject,
-) {
-  // The object does not contain any ReferenceObject.
-  if (isSchemaObject(object) && !hasReferenceObject(object)) {
-    return object
-  }
-  if (isReferenceObject(object)) {
-    const name = getSchemaNameFromRef(object.$ref)
-    const schema = componentsObject?.schemas?.[name]
-    if (!schema) {
-      throw new Error(`Schema for reference ${object.$ref} not found.`)
-    }
-    return convertReferenceToSchema(componentsObject, schema)
-  }
-  else {
-    // The SchemaObject contains one or more ReferenceObjects.
-    const newObject = Object.assign({}, object)
-    newObject.allOf = newObject.allOf?.map(o => convertReferenceToSchema(componentsObject, o))
-    newObject.anyOf = newObject.anyOf?.map(o => convertReferenceToSchema(componentsObject, o))
-    newObject.oneOf = newObject.oneOf?.map(o => convertReferenceToSchema(componentsObject, o))
-    newObject.items = newObject.items ? convertReferenceToSchema(componentsObject, newObject.items) : undefined
-    newObject.additionalProperties = newObject.additionalProperties && typeof newObject.additionalProperties !== 'boolean'
-      ? convertReferenceToSchema(componentsObject, newObject.additionalProperties)
-      : undefined
-    const newProperties = newObject.properties ?? {}
-    for (const name in newObject.properties) {
-      newProperties[name] = convertReferenceToSchema(componentsObject, newObject.properties[name])
-    }
-    newObject.properties = newProperties
-
-    // TODO: newObject.not
-    // TODO: newObject.propertyNames
-
-    return newObject
-  }
-}
-
-/**
- * Resolves all schema references within the OpenAPI object,
- * replacing each $ref with the pure schema object.
- *
- * @returns A new OpenAPIObject with resolved schema references.
- */
-function resolveSchemaReferences(openApiObject: OpenAPIObject) {
-  const result = { ...openApiObject }
-
-  if (result.components?.schemas) {
-    for (const name in result.components.schemas) {
-      const schema = result.components.schemas[name]
-      result.components.schemas[name] = convertReferenceToSchema(openApiObject, schema)
-    }
-  }
-
-  return result
-}
-
-/**
  * Determines if a given CallExpression represents an object creation.
  *
  * This function checks if the call expression corresponds to property access
@@ -840,8 +775,6 @@ export default {
   applyMergeToZodExpression,
   applyComment,
   hasReferenceObject,
-  convertReferenceToSchema,
-  resolveSchemaReferences,
   isObjectExpression,
   isDocExtendedNotation,
   isParameterObject,
