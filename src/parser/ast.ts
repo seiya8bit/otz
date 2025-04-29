@@ -673,28 +673,54 @@ function applyComment<T extends Node>(comment: string, line: 'single' | 'multipl
  * @param object - The schema object to check for references.
  * @returns A boolean indicating if there is a reference object.
  */
-function hasReferenceObject(object: SchemaObject) {
-  const targets: Record<string, (SchemaObject | ReferenceObject)[]> = {
-    allOf: object.allOf ?? [],
-    anyOf: object.anyOf ?? [],
-    oneOf: object.oneOf ?? [],
-    items: object.items ? [object.items] : [],
-    properties: object.properties ? [...Object.values(object.properties)] : [],
-    additionalProperties: object.additionalProperties
-      ? typeof object.additionalProperties !== 'boolean' ? [object.additionalProperties] : []
-      : [],
-    // TODO: check if `not` in SchemaObject is ReferenceObject
-    // TODO: check if `propertyNames` in SchemaObject is ReferenceObject
-  }
-
-  for (const [_, values] of Object.entries(targets)) {
-    for (const value of values) {
-      if (isReferenceObject(value)) {
+/**
+ * Checks if a schema object contains any reference objects by recursively traversing its structure.
+ * This includes references in nested objects, arrays, and other complex structures.
+ *
+ * @param object - The schema object to check for references
+ * @returns True if the schema contains any reference objects, false otherwise
+ */
+function hasReferenceObject(object: SchemaObject): boolean {
+  const checkForReferences = (schema: SchemaObject | ReferenceObject): boolean => {
+    if (isReferenceObject(schema)) {
+      return true
+    }
+    if (!isReferenceObject(schema)) {
+      if (schema.allOf?.some(item => checkForReferences(item))) {
+        return true
+      }
+      if (schema.anyOf?.some(item => checkForReferences(item))) {
+        return true
+      }
+      if (schema.oneOf?.some(item => checkForReferences(item))) {
+        return true
+      }
+      if (schema.items && checkForReferences(schema.items)) {
+        return true
+      }
+      if (schema.properties) {
+        for (const prop of Object.values(schema.properties)) {
+          if (checkForReferences(prop))
+            return true
+        }
+      }
+      if (schema.additionalProperties && typeof schema.additionalProperties !== 'boolean') {
+        if (checkForReferences(schema.additionalProperties)) {
+          return true
+        }
+      }
+      if (schema.not && checkForReferences(schema.not)) {
+        return true
+      }
+      if (schema.propertyNames && checkForReferences(schema.propertyNames)) {
         return true
       }
     }
+
+    return false
   }
-  return false
+
+  return checkForReferences(object)
 }
 
 /**
