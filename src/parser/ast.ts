@@ -403,6 +403,7 @@ function createZodPropertyAssignmentAst(
 
   const description = removeZodSchemaFromDescription(object.description)
 
+  // For direct reference objects, use a getter
   if (isReferenceObject(object)) {
     const name = getSchemaNameFromRef(object.$ref)
     const node = ts.factory.createGetAccessorDeclaration(
@@ -415,6 +416,33 @@ function createZodPropertyAssignmentAst(
           ts.factory.createReturnStatement(
             ts.factory.createIdentifier(
               camelCase(`${c.SCHEMA_PREFIX}_${name}`),
+            ),
+          ),
+        ],
+        true,
+      ),
+    )
+    return applyComment(description, 'single', node)
+  }
+  // For arrays with items that are references, also use getters
+  else if (object.type === 'array' && object.items && isReferenceObject(object.items)) {
+    const refName = getSchemaNameFromRef(object.items.$ref)
+    const node = ts.factory.createGetAccessorDeclaration(
+      undefined,
+      propertyName,
+      [],
+      undefined,
+      ts.factory.createBlock(
+        [
+          ts.factory.createReturnStatement(
+            ts.factory.createCallExpression(
+              createZodPropertyAccessAst('array'),
+              undefined,
+              [
+                ts.factory.createIdentifier(
+                  camelCase(`${c.SCHEMA_PREFIX}_${refName}`),
+                ),
+              ],
             ),
           ),
         ],
