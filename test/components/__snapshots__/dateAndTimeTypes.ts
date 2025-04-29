@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const schemaDateAndTimeTypes = z.object({
+export const schemaDateAndTimeTypes = z.interface({
     plainDateProperty: z.iso.date().default("1970-01-01T00:00:00Z"),
     plainTimeProperty: z.iso.time().default("1970-01-01T00:00:00Z"),
     utcDateTimeProperty: z.iso.datetime().default("1970-01-01T00:00:00Z"),

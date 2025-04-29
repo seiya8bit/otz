@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const schemaNumericTypes = z.object({
+export const schemaNumericTypes = z.interface({
     numericProperty: z.number().default(0),
     integerProperty: z.number().default(0),
     floatProperty: z.number().default(0),

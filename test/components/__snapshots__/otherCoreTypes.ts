@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const schemaOtherCoreTypes = z.object({
+export const schemaOtherCoreTypes = z.interface({
     bytesProperty: z.string(),
     stringProperty: z.string().default("default value"),
     booleanProperty: z.boolean().default(true),
