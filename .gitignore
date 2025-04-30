@@ -8,3 +8,5 @@ types
 .gen
 .nyc_output
 .idea/
+
+debug/

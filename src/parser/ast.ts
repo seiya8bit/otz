@@ -3,98 +3,13 @@ import type { CallExpression, Identifier, Node, ObjectLiteralElementLike } from 
 import { EOL } from 'node:os'
 import camelCase from 'camelcase'
 import consola from 'consola'
-import { isReferenceObject } from 'openapi3-ts/oas31'
+import { isReferenceObject, isSchemaObject } from 'openapi3-ts/oas31'
 import * as ts from 'typescript'
 import c from '../constants.js'
 import { getGlobalOptions } from '../globals.js'
 import helper from './helper.js'
 
-/**
- * Converts a string into a valid TypeScript identifier.
- *
- * @param str - The string to convert into a valid identifier.
- * @returns A valid TypeScript identifier.
- *
- * @example
- * ```ts
- * toValidIdentifier('123abc') // Returns '_123abc'
- * toValidIdentifier('hello-world') // Returns 'hello_world'
- * toValidIdentifier('class') // Returns '_class' (reserved keyword)
- * toValidIdentifier('') // Returns '_'
- * ```
- *
- * @remarks
- * This function performs the following transformations:
- * - Replaces invalid starting characters with '_'
- * - Converts invalid characters to '_'
- * - Prefixes reserved TypeScript keywords with '_'
- * - Returns '_' for empty strings
- *
- * Valid identifiers must:
- * - Start with a letter, underscore (_), or dollar sign ($)
- * - Contain only letters, numbers, underscores, or dollar signs
- * - Not be a reserved TypeScript keyword
- */
-function toValidIdentifier(str: string) {
-  if (!str) {
-    return '_'
-  }
-  let result = str.replace(/^[^a-z_$]/i, match => /\d/.test(match) ? `_${match}` : '_')
-  result = result.replace(/[^\w$]/g, '_')
-
-  if (c.TS_RESERVED_KEYWORDS.includes(result)) {
-    result = `_${result}`
-  }
-  return result
-}
-
-/**
- * Extracts the schema name from a reference string ($ref).
- *
- * @param $ref - The reference string in the format "#/components/schemas/SchemaName".
- * @returns The schema name extracted from the reference path. Returns an empty string if the path is invalid.
- *
- * @example
- * ```ts
- * const ref = "#/components/schemas/User"
- * getSchemaNameFromRef(ref) // Returns "User"
- * ```
- *
- * @remarks
- * This function expects references to follow the OpenAPI convention of using "#/components/schemas/"
- * as the base path. If the reference doesn't follow this convention, a warning will be logged.
- */
-function getSchemaNameFromRef($ref: string) {
-  if (!$ref.startsWith('#/components/schemas')) {
-    consola.warn('$ref does not start with the expected path `#/components/schemas`.')
-  }
-  return $ref.split('/').pop() ?? ''
-}
-
-/**
- * Creates an import declaration for the zod library.
- *
- * @returns A TypeScript import declaration for zod.
- *
- * @example
- * ```ts
- * import { z } from "zod"
- * ```
- */
-function createZodImportAst() {
-  return ts.factory.createImportDeclaration(
-    undefined,
-    ts.factory.createImportClause(
-      false,
-      undefined,
-      ts.factory.createNamedImports([
-        ts.factory.createImportSpecifier(false, undefined, ts.factory.createIdentifier('z')),
-      ]),
-    ),
-    ts.factory.createStringLiteral('zod'),
-    undefined,
-  )
-}
+type NullableSchemaObject = SchemaObject & { nullable: boolean }
 
 const _zodBaseTypes = [
   'string',
@@ -183,6 +98,93 @@ type ZodType =
   | typeof _zodBaseTypes[number]
   | typeof _zodNumberTypes[number]
   | typeof _zodStringTypes[number]
+
+/**
+ * Converts a string into a valid TypeScript identifier.
+ *
+ * @param str - The string to convert into a valid identifier.
+ * @returns A valid TypeScript identifier.
+ *
+ * @example
+ * ```ts
+ * toValidIdentifier('123abc') // Returns '_123abc'
+ * toValidIdentifier('hello-world') // Returns 'hello_world'
+ * toValidIdentifier('class') // Returns '_class' (reserved keyword)
+ * toValidIdentifier('') // Returns '_'
+ * ```
+ *
+ * @remarks
+ * This function performs the following transformations:
+ * - Replaces invalid starting characters with '_'
+ * - Converts invalid characters to '_'
+ * - Prefixes reserved TypeScript keywords with '_'
+ * - Returns '_' for empty strings
+ *
+ * Valid identifiers must:
+ * - Start with a letter, underscore (_), or dollar sign ($)
+ * - Contain only letters, numbers, underscores, or dollar signs
+ * - Not be a reserved TypeScript keyword
+ */
+function toValidIdentifier(str: string) {
+  if (!str) {
+    return '_'
+  }
+  let result = str.replace(/^[^a-z_$]/i, match => /\d/.test(match) ? `_${match}` : '_')
+  result = result.replace(/[^\w$]/g, '_')
+
+  if (c.TS_RESERVED_KEYWORDS.includes(result)) {
+    result = `_${result}`
+  }
+  return result
+}
+
+/**
+ * Extracts the schema name from a reference string ($ref).
+ *
+ * @param $ref - The reference string in the format "#/components/schemas/SchemaName".
+ * @returns The schema name extracted from the reference path. Returns an empty string if the path is invalid.
+ *
+ * @example
+ * ```ts
+ * const ref = "#/components/schemas/User"
+ * getSchemaNameFromRef(ref) // Returns "User"
+ * ```
+ *
+ * @remarks
+ * This function expects references to follow the OpenAPI convention of using "#/components/schemas/"
+ * as the base path. If the reference doesn't follow this convention, a warning will be logged.
+ */
+function getSchemaNameFromRef($ref: string) {
+  if (!$ref.startsWith('#/components/schemas')) {
+    consola.warn('$ref does not start with the expected path `#/components/schemas`.')
+  }
+  return $ref.split('/').pop() ?? ''
+}
+
+/**
+ * Creates an import declaration for the zod library.
+ *
+ * @returns A TypeScript import declaration for zod.
+ *
+ * @example
+ * ```ts
+ * import { z } from "zod"
+ * ```
+ */
+function createZodImportAst() {
+  return ts.factory.createImportDeclaration(
+    undefined,
+    ts.factory.createImportClause(
+      false,
+      undefined,
+      ts.factory.createNamedImports([
+        ts.factory.createImportSpecifier(false, undefined, ts.factory.createIdentifier('z')),
+      ]),
+    ),
+    ts.factory.createStringLiteral('zod'),
+    undefined,
+  )
+}
 
 const numberFormatMap: { [key: string]: typeof _zodNumberTypes[number] } = {
   int: 'int',
@@ -284,7 +286,6 @@ function createZodSchemaAst(
         )],
       )
     }
-
     // Union type
     if (object.anyOf || object.oneOf) {
       const target = [...object?.anyOf ?? [], ...object?.oneOf ?? []]
@@ -296,19 +297,30 @@ function createZodSchemaAst(
         [ts.factory.createArrayLiteralExpression(unionTypes, false)],
       )
     }
-
+    // Null type
+    if (hasNullableProperty(object) && !object.type) {
+      return ts.factory.createCallExpression(
+        createZodPropertyAccessAst('null'),
+        undefined,
+        [],
+      )
+    }
     // Extended notation for description
     if (isDocExtendedNotation(object.description)) {
       const schemaExpression = extractZodSchemaFromDescription(object.description)
       return ts.factory.createIdentifier(schemaExpression)
     }
-
+    // Basic types
     switch (object.type) {
       case 'array':
         return ts.factory.createCallExpression(
           createZodPropertyAccessAst('array'),
           undefined,
-          [object.items ? createZodSchemaAst(object.items) : createZodPropertyAccessAst('unknown')],
+          [
+            object.items
+              ? createZodSchemaAst(object.items)
+              : createZodPropertyAccessAst('unknown'),
+          ],
         )
       case 'object':
       {
@@ -368,7 +380,8 @@ function createZodSchemaAst(
   if (ts.isCallExpression(expression)) {
     expression = applyMergeToZodExpression(object, expression)
     expression = applyConstraintsToZodExpression(object, expression)
-    expression = applyNullableToZodExpression(required, expression)
+    expression = applyRequiredToZodExpression(required, expression)
+    expression = applyNullableToZodExpression(object, expression)
     expression = applyDefaultToZodExpression(object, expression)
   }
 
@@ -511,11 +524,11 @@ function applyDefaultToZodExpression(object: SchemaObject, callExpression: CallE
     switch (type) {
       case 'string':
       {
-        const bigintOrUndefined = helper.parseBigInt(v)
+        if (helper.isBigIntLiteral(v)) {
+          return ts.factory.createBigIntLiteral(v)
+        }
 
-        return typeof bigintOrUndefined === 'bigint'
-          ? ts.factory.createBigIntLiteral(v)
-          : ts.factory.createStringLiteral(v)
+        return ts.factory.createStringLiteral(v)
       }
       case 'number':
         return ts.factory.createNumericLiteral(v)
@@ -558,7 +571,7 @@ function applyDefaultToZodExpression(object: SchemaObject, callExpression: CallE
  * @param callExpression - The current call expression.
  * @returns The modified CallExpression.
  */
-function applyNullableToZodExpression(required: boolean, callExpression: CallExpression) {
+function applyRequiredToZodExpression(required: boolean, callExpression: CallExpression) {
   if (required) {
     return callExpression
   }
@@ -572,6 +585,32 @@ function applyNullableToZodExpression(required: boolean, callExpression: CallExp
     undefined,
     [],
   )
+}
+
+/**
+ * Applies nullable property to a Zod expression based on schema object configuration
+ *
+ * @param object Schema object containing type and nullable information
+ * @param callExpression The Zod call expression to modify
+ * @returns Modified call expression with nullable method if applicable
+ */
+function applyNullableToZodExpression(object: SchemaObject, callExpression: CallExpression) {
+  const hasType = object.type !== undefined
+  const isNullable = hasNullableProperty(object) && object.nullable
+
+  const identifier = getGlobalOptions().nullableMode
+
+  if (hasType && isNullable) {
+    return ts.factory.createCallExpression(
+      ts.factory.createPropertyAccessExpression(
+        callExpression,
+        ts.factory.createIdentifier(identifier),
+      ),
+      undefined,
+      [],
+    )
+  }
+  return callExpression
 }
 
 /**
@@ -767,6 +806,25 @@ function isParameterObject(object: ReferenceObject | ParameterObject): object is
 }
 
 /**
+ * Checks if the provided object is a SchemaObject that represents a nullable type
+ * without a specific type property. This is used to identify schema objects that
+ * should be treated as nullable in the OpenAPI specification.
+ *
+ * @param object - The object to check, which can be either a ReferenceObject or a SchemaObject.
+ * @returns True if the object is a SchemaObject with nullable=true and no type property; otherwise, false.
+ */
+function hasNullableProperty(
+  object: ReferenceObject | SchemaObject,
+): object is NullableSchemaObject {
+  const nullableObject = object as NullableSchemaObject
+
+  if (!isSchemaObject(nullableObject)) {
+    return false
+  }
+  return nullableObject.nullable !== undefined
+}
+
+/**
  * Extracts the Zod schema portion from a documentation's extended notation.
  * The extended notation is recognized if it contains 'zod:' followed by the schema definition.
  *
@@ -824,6 +882,7 @@ export default {
   createZodPropertyAssignmentAst,
   createZodVariableStatement,
   applyDefaultToZodExpression,
+  applyRequiredToZodExpression,
   applyNullableToZodExpression,
   applyConstraintsToZodExpression,
   applyMergeToZodExpression,

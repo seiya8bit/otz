@@ -1,29 +1,41 @@
 /**
- * Checks if a string represents a BigInt literal (e.g., '10n', '-5n')
- * and returns the corresponding BigInt value if it does, otherwise returns undefined.
+ * Determines if a string represents a valid JavaScript BigInt literal.
  *
- * @param input - The string to check.
- * @returns The BigInt value or undefined.
+ * @param input - The string to check for BigInt literal format
+ * @returns `true` if the string is a valid BigInt literal (ends with 'n' and can be parsed as a BigInt), `false` otherwise
+ *
+ * @example
+ * ```ts
+ * isBigIntLiteral("123n") // Returns true
+ * isBigIntLiteral("0n")   // Returns true
+ * isBigIntLiteral("-5n")  // Returns true
+ * isBigIntLiteral("123")  // Returns false (no 'n' suffix)
+ * isBigIntLiteral("n")    // Returns false (no numeric part)
+ * isBigIntLiteral("-n")   // Returns false (invalid numeric part)
+ * isBigIntLiteral("abc")  // Returns false (not a number)
+ * ```
+ *
+ * @remarks
+ * A valid BigInt literal in JavaScript must:
+ * - End with the 'n' character
+ * - Have a valid numeric part that can be converted to a BigInt
+ * - Not be just 'n' or '-n' (must have actual digits)
  */
-function parseBigInt(input: string): bigint | undefined {
-  if (typeof input !== 'string' || !input.endsWith('n')) {
-    return undefined
-  }
-
+function isBigIntLiteral(input: string): boolean {
   const numericPart = input.slice(0, -1)
 
-  if (numericPart === '' || numericPart === '-') {
-    return undefined
+  if (!input.endsWith('n') || numericPart === '' || numericPart === '-') {
+    return false
   }
 
   try {
-    return BigInt(numericPart)
+    return typeof BigInt(numericPart) === 'bigint'
   }
   catch {
-    return undefined
+    return false
   }
 }
 
 export default {
-  parseBigInt,
+  isBigIntLiteral,
 }
