@@ -1,7 +1,7 @@
 {
   "name": "@seiya8bit/otz",
   "type": "module",
-  "version": "4.0.0-next.0",
+  "version": "4.0.0-next.1",
   "packageManager": "npm@10.9.0",
   "description": "Convert OpenAPI and TypeSpec definitions to Zod(v4 beta) validation schemas.",
   "author": "seiya8bit",
