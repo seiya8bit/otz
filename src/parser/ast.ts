@@ -1,4 +1,4 @@
-import type { ParameterObject, ReferenceObject, SchemaObject } from 'openapi3-ts/oas31'
+import type { ParameterObject, ReferenceObject, SchemaObject, SchemaObjectType } from 'openapi3-ts/oas31'
 import type { CallExpression, Identifier, Node, ObjectLiteralElementLike } from 'typescript'
 import { EOL } from 'node:os'
 import camelCase from 'camelcase'
@@ -297,6 +297,25 @@ function createZodSchemaAst(
         [ts.factory.createArrayLiteralExpression(unionTypes, false)],
       )
     }
+    // Handle type as array (union of types)
+    if (Array.isArray(object.type)) {
+      // Filter out 'null' as it's handled by nullable property
+      const types = object.type
+      const unionTypes = types.map((type) => {
+        const tempSchema = { ...object }
+
+        // Convert type to string to handle 'null' which is represented as an object
+        tempSchema.type = String(type) as SchemaObjectType
+
+        return createZodSchemaAst(tempSchema)
+      })
+
+      return ts.factory.createCallExpression(
+        createZodPropertyAccessAst('union'),
+        undefined,
+        [ts.factory.createArrayLiteralExpression(unionTypes, false)],
+      )
+    }
     // Null type
     if (hasNullableProperty(object) && !object.type) {
       return ts.factory.createCallExpression(
@@ -310,6 +329,7 @@ function createZodSchemaAst(
       const schemaExpression = extractZodSchemaFromDescription(object.description)
       return ts.factory.createIdentifier(schemaExpression)
     }
+
     // Basic types
     switch (object.type) {
       case 'array':
@@ -816,12 +836,19 @@ function isParameterObject(object: ReferenceObject | ParameterObject): object is
 function hasNullableProperty(
   object: ReferenceObject | SchemaObject,
 ): object is NullableSchemaObject {
-  const nullableObject = object as NullableSchemaObject
-
-  if (!isSchemaObject(nullableObject)) {
+  if (!isSchemaObject(object)) {
     return false
   }
-  return nullableObject.nullable !== undefined
+
+  const nsObject = object as NullableSchemaObject
+
+  if (nsObject.nullable !== undefined) {
+    return true
+  }
+  if (Array.isArray(nsObject.type) && nsObject.type.includes('null')) {
+    return true
+  }
+  return false
 }
 
 /**
